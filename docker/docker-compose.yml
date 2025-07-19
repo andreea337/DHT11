@@ -1,0 +1,37 @@
+version: "3.7"
+services:
+  mosquitto:
+    image: eclipse-mosquitto
+    container_name: mqtt5
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes: #Bind Mount (host : container)
+      - /mosquitto/config:/mosquitto/config:rw
+      - /mosquitto/data:/mosquitto/data:rw
+      - /mosquitto/log:/mosquitto/log:rw
+    restart: unless-stopped
+    networks:
+      - mqtt5-network
+ 
+  nodered:
+    image: nodered/node-red:latest
+    container_name: nodered
+    ports:
+      - "1880:1880"
+    volumes:
+      - nodered_data:/data
+    depends_on:
+      - mosquitto
+    restart: unless-stopped
+    networks:
+      - mqtt5-network
+    environment:
+      - TZ=Asia/Taipei
+      
+volumes:
+  nodered_data:
+
+networks:
+  mqtt5-network:
+    driver: bridge
